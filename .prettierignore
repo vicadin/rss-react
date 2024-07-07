@@ -1,0 +1,11 @@
+dist
+public
+webpack.config.js
+node modules
+.eslintrc.json
+package.json
+.prettierrc.json
+tsconfig.json
+webpack.config.js
+package-lock.json
+.husky
