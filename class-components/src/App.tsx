@@ -77,6 +77,14 @@ class App extends Component<Record<string, unknown>, AppState> {
       return (
         <div>
           <h2>Something went wrong</h2>
+          <button
+            className="error-btn"
+            onClick={() => {
+              throw new Error("Error!");
+            }}
+          >
+            Throw Error
+          </button>
         </div>
       );
     }

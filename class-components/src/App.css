@@ -26,3 +26,7 @@
 .loader {
   width: 100vw;
 }
+.error-btn {
+  background: rgb(170, 0, 0);
+  color: white;
+}
