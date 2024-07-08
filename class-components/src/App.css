@@ -23,3 +23,6 @@
   display: flex;
   justify-content: center;
 }
+.loader {
+  width: 100vw;
+}

@@ -3,6 +3,7 @@ import { Pokemon, PokemonListResponse } from "./types";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import Result from "./Result";
+import loaderGif from "../src/assets/loader.gif";
 
 const API_URL = "https://pokeapi.co/api/v2/pokemon";
 
@@ -10,6 +11,7 @@ function App() {
   const [searchQuery, setSearchQuery] = useState("");
   const [results, setResults] = useState<Pokemon[]>([]);
   const [error, setError] = useState<Error | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const savedQuery = localStorage.getItem("searchQuery");
@@ -24,6 +26,7 @@ function App() {
   const fetchResults = async (query: string) => {
     try {
       setError(null);
+      setIsLoading(true);
       let response;
       if (query.trim() === "") {
         response = await axios.get<PokemonListResponse>(`${API_URL}?limit=10&offset=0`);
@@ -44,6 +47,8 @@ function App() {
     } catch (err) {
       setError(err as Error);
       console.error(err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -76,7 +81,11 @@ function App() {
           </button>
         </div>
         <div className="result">
-          {results.length > 0 ? (
+          {isLoading ? (
+            <div className="loader">
+              <img src={loaderGif} alt="Loading..." className="loader" />
+            </div>
+          ) : results.length > 0 ? (
             results.map((result: Pokemon) => <Result key={result.name} result={result} />)
           ) : (
             <p>No results found.</p>
