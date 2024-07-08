@@ -1,72 +1,87 @@
 import "./App.css";
-import { Pokemon, PokemonListResponse } from "./types";
-import { useState, useEffect } from "react";
+import React, { Component } from "react";
 import axios from "axios";
+import { Pokemon, PokemonListResponse } from "./types";
 import Result from "./Result";
 import loaderGif from "../src/assets/loader.gif";
 
 const API_URL = "https://pokeapi.co/api/v2/pokemon";
 
-function App() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [results, setResults] = useState<Pokemon[]>([]);
-  const [error, setError] = useState<Error | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+interface AppState {
+  searchQuery: string;
+  results: Pokemon[];
+  error: Error | null;
+  isLoading: boolean;
+}
 
-  useEffect(() => {
+class App extends Component<Record<string, unknown>, AppState> {
+  constructor(props: Record<string, unknown>) {
+    super(props);
+    this.state = {
+      searchQuery: "",
+      results: [],
+      error: null,
+      isLoading: true,
+    };
+  }
+
+  componentDidMount() {
     const savedQuery = localStorage.getItem("searchQuery");
     if (savedQuery) {
-      setSearchQuery(savedQuery);
-      fetchResults(savedQuery);
+      this.setState({ searchQuery: savedQuery });
+      this.fetchResults(savedQuery);
     } else {
-      fetchResults("");
+      this.fetchResults("");
     }
-  }, []);
+  }
 
-  const fetchResults = async (query: string) => {
+  fetchResults = async (query: string) => {
     try {
-      setError(null);
-      setIsLoading(true);
+      this.setState({ error: null, isLoading: true });
       let response;
       if (query.trim() === "") {
         response = await axios.get<PokemonListResponse>(`${API_URL}?limit=10&offset=0`);
-        setResults(response.data.results || []);
+        this.setState({ results: response.data.results || [] });
       } else {
         response = await axios.get<Pokemon>(`${API_URL}/${query.trim().toLowerCase()}`);
-        setResults([
-          {
-            name: response.data.name,
-            url: `${API_URL}/${response.data.name}`,
-            abilities: response.data.abilities,
-            base_experience: response.data.base_experience,
-            forms: response.data.forms,
-            game_indices: response.data.game_indices,
-          },
-        ]);
+        this.setState({
+          results: [
+            {
+              name: response.data.name,
+              url: `${API_URL}/${response.data.name}`,
+              abilities: response.data.abilities,
+              base_experience: response.data.base_experience,
+              forms: response.data.forms,
+              game_indices: response.data.game_indices,
+            },
+          ],
+        });
       }
     } catch (err) {
-      setError(err as Error);
+      this.setState({ error: err as Error });
       console.error(err);
     } finally {
-      setIsLoading(false);
+      this.setState({ isLoading: false });
     }
   };
 
-  const handleSearch = () => {
-    localStorage.setItem("searchQuery", searchQuery.trim());
-    fetchResults(searchQuery.trim());
+  handleSearch = () => {
+    localStorage.setItem("searchQuery", this.state.searchQuery.trim());
+    this.fetchResults(this.state.searchQuery.trim());
   };
 
-  if (error) {
-    return (
-      <div>
-        <h2>Something went wrong</h2>
-      </div>
-    );
-  }
+  render() {
+    const { searchQuery, results, error, isLoading } = this.state;
 
-  return (
-    <>
+    if (error) {
+      return (
+        <div>
+          <h2>Something went wrong</h2>
+        </div>
+      );
+    }
+
+    return (
       <div>
         <div className="search-panel">
           <input
@@ -74,9 +89,9 @@ function App() {
             type="text"
             placeholder="Search..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => this.setState({ searchQuery: e.target.value })}
           />
-          <button className="search-btn" onClick={handleSearch}>
+          <button className="search-btn" onClick={this.handleSearch}>
             Search
           </button>
         </div>
@@ -92,8 +107,8 @@ function App() {
           )}
         </div>
       </div>
-    </>
-  );
+    );
+  }
 }
 
 export default App;

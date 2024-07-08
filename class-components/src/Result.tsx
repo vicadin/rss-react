@@ -1,5 +1,5 @@
 import React from "react";
-import { Ability, Form, GameIndex, Pokemon } from "./types";
+import { Pokemon } from "./types";
 
 interface ResultProps {
   result: Pokemon;
@@ -16,7 +16,7 @@ const Result: React.FC<ResultProps> = ({ result }) => {
         <div>
           <h3>Abilities</h3>
           <ul>
-            {result.abilities.map((ability: Ability, index: number) => (
+            {result.abilities.map((ability, index) => (
               <li key={index}>{ability.ability.name}</li>
             ))}
           </ul>
@@ -26,7 +26,7 @@ const Result: React.FC<ResultProps> = ({ result }) => {
         <div>
           <h3>Forms</h3>
           <ul>
-            {result.forms.map((form: Form, index: number) => (
+            {result.forms.map((form, index) => (
               <li key={index}>{form.name}</li>
             ))}
           </ul>
@@ -42,7 +42,7 @@ const Result: React.FC<ResultProps> = ({ result }) => {
         <div>
           <h3>Game Indices</h3>
           <ul>
-            {result.game_indices.map((gameIndex: GameIndex, index: number) => (
+            {result.game_indices.map((gameIndex, index) => (
               <li key={index}>
                 {gameIndex.version.name}: {gameIndex.game_index}
               </li>
