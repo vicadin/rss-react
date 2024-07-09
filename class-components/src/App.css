@@ -1,0 +1,32 @@
+#root {
+  height: 100vh;
+}
+.search-btn {
+  background: #ff450b;
+  color: white;
+  text-transform: uppercase;
+}
+.search-input {
+  border-radius: 8px;
+  margin-right: 12px;
+  height: 41px;
+  box-sizing: border-box;
+  border: 2px black solid;
+  padding: 0 12px;
+  font-size: 20px;
+  box-shadow: none;
+}
+.search-panel {
+  width: 100vw;
+  padding: 20px 0;
+  border-bottom: 1px solid rgba(255, 127, 91, 0.248);
+  display: flex;
+  justify-content: center;
+}
+.loader {
+  width: 100vw;
+}
+.error-btn {
+  background: rgb(170, 0, 0);
+  color: white;
+}
