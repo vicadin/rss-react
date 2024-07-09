@@ -1,18 +1,11 @@
 import "./App.css";
 import { Component } from "react";
 import axios from "axios";
-import { Pokemon, PokemonListResponse } from "./types";
+import { Pokemon, PokemonListResponse, AppState } from "./types";
 import Result from "./Result";
 import loaderGif from "../src/assets/loader.gif";
 
 const API_URL = "https://pokeapi.co/api/v2/pokemon";
-
-interface AppState {
-  searchQuery: string;
-  results: Pokemon[];
-  error: Error | null;
-  isLoading: boolean;
-}
 
 class App extends Component<Record<string, unknown>, AppState> {
   constructor(props: Record<string, unknown>) {

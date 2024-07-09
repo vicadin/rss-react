@@ -32,3 +32,9 @@ export interface Pokemon {
 export interface PokemonListResponse {
   results: Pokemon[];
 }
+export interface AppState {
+  searchQuery: string;
+  results: Pokemon[];
+  error: Error | null;
+  isLoading: boolean;
+}
