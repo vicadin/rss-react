@@ -1,5 +1,5 @@
 import "./App.css";
-import React, { Component } from "react";
+import { Component } from "react";
 import axios from "axios";
 import { Pokemon, PokemonListResponse } from "./types";
 import Result from "./Result";
