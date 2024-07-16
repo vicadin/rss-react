@@ -26,7 +26,7 @@ const App: React.FC = () => {
     if (savedQuery) {
       setSearchQuery(savedQuery);
     }
-  });
+  }, []);
 
   useEffect(() => {
     fetchResults(searchQuery, currentPage);
