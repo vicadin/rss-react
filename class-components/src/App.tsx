@@ -1,30 +1,50 @@
 import "./App.css";
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { Pokemon, PokemonListResponse } from "./types";
 import Result from "./Result";
+import Pagination from "./Pagination";
 import loaderGif from "../src/assets/loader.gif";
 import useSearchQuery from "./useSearchQuery";
+import { useSearchParams } from "react-router-dom";
 
 const API_URL = "https://pokeapi.co/api/v2/pokemon";
+const ITEMS_PER_PAGE = 10;
+
 const App: React.FC = () => {
-  const [searchQuery, setSearchQuery] = useSearchQuery("searchQuery");
   const [results, setResults] = useState<Pokemon[]>([]);
   const [error, setError] = useState<Error | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [totalPages, setTotalPages] = useState<number>(0);
+  const [searchQuery, setSearchQuery] = useSearchQuery();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const currentPage = parseInt(searchParams.get("page") || "1", 10);
 
   useEffect(() => {
-    fetchResults(searchQuery);
-  }, []);
+    const savedQuery = localStorage.getItem("searchQuery");
+    if (savedQuery) {
+      setSearchQuery(savedQuery);
+    }
+  });
 
-  const fetchResults = async (query: string) => {
+  useEffect(() => {
+    fetchResults(searchQuery, currentPage);
+  }, [currentPage]);
+
+  const fetchResults = async (query: string, page: number) => {
     try {
       setError(null);
       setIsLoading(true);
       let response;
+      const offset = (page - 1) * ITEMS_PER_PAGE;
+
       if (query.trim() === "") {
-        response = await axios.get<PokemonListResponse>(`${API_URL}?limit=10&offset=0`);
+        response = await axios.get<PokemonListResponse>(
+          `${API_URL}?limit=${ITEMS_PER_PAGE}&offset=${offset}`,
+        );
         setResults(response.data.results || []);
+        setTotalPages(Math.ceil(response.data.count / ITEMS_PER_PAGE));
       } else {
         response = await axios.get<Pokemon>(`${API_URL}/${query.trim().toLowerCase()}`);
         setResults([
@@ -37,6 +57,7 @@ const App: React.FC = () => {
             game_indices: response.data.game_indices,
           },
         ]);
+        setTotalPages(1);
       }
     } catch (err) {
       setError(err as Error);
@@ -47,7 +68,13 @@ const App: React.FC = () => {
   };
 
   const handleSearch = () => {
-    fetchResults(searchQuery.trim());
+    localStorage.setItem("searchQuery", searchQuery.trim());
+    setSearchParams({ page: "1" });
+    fetchResults(searchQuery.trim(), 1);
+  };
+
+  const updatePage = (page: number) => {
+    setSearchParams({ page: page.toString() });
   };
 
   if (error) {
@@ -91,6 +118,9 @@ const App: React.FC = () => {
           <p>No results found.</p>
         )}
       </div>
+      {results.length > 0 && (
+        <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={updatePage} />
+      )}
     </div>
   );
 };

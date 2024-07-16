@@ -1,15 +1,15 @@
 import { useState, useEffect } from "react";
 
-const useSearchQuery = (key: string) => {
-  const [searchQuery, setSearchQuery] = useState(() => {
-    return localStorage.getItem(key) || "";
+const useSearchQuery = () => {
+  const [searchQuery, setSearchQuery] = useState<string>(() => {
+    return localStorage.getItem("searchQuery") || "";
   });
 
   useEffect(() => {
     return () => {
-      localStorage.setItem(key, searchQuery);
+      localStorage.setItem("searchQuery", searchQuery);
     };
-  }, [key, searchQuery]);
+  }, [searchQuery]);
 
   return [searchQuery, setSearchQuery] as const;
 };
