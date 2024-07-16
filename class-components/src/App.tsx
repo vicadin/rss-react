@@ -4,23 +4,17 @@ import axios from "axios";
 import { Pokemon, PokemonListResponse } from "./types";
 import Result from "./Result";
 import loaderGif from "../src/assets/loader.gif";
+import useSearchQuery from "./useSearchQuery";
 
 const API_URL = "https://pokeapi.co/api/v2/pokemon";
-
 const App: React.FC = () => {
-  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [searchQuery, setSearchQuery] = useSearchQuery("searchQuery");
   const [results, setResults] = useState<Pokemon[]>([]);
   const [error, setError] = useState<Error | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    const savedQuery = localStorage.getItem("searchQuery");
-    if (savedQuery) {
-      setSearchQuery(savedQuery);
-      fetchResults(savedQuery);
-    } else {
-      fetchResults("");
-    }
+    fetchResults(searchQuery);
   }, []);
 
   const fetchResults = async (query: string) => {
@@ -53,7 +47,6 @@ const App: React.FC = () => {
   };
 
   const handleSearch = () => {
-    localStorage.setItem("searchQuery", searchQuery.trim());
     fetchResults(searchQuery.trim());
   };
 
