@@ -3,11 +3,12 @@ import { Pokemon } from "./types";
 
 interface ResultProps {
   result: Pokemon;
+  onSelect: (name: string) => void;
 }
 
-const Result: React.FC<ResultProps> = ({ result }) => {
+const Result: React.FC<ResultProps> = ({ result, onSelect }) => {
   return (
-    <div>
+    <div onClick={() => onSelect(result.name)}>
       <h2>{result.name}</h2>
       <p>
         <a href={result.url}>{result.url}</a>

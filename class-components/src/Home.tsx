@@ -16,10 +16,13 @@ const Home: React.FC = () => {
   const [error, setError] = useState<Error | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [totalPages, setTotalPages] = useState<number>(0);
+  const [selectedPokemon, setSelectedPokemon] = useState<Pokemon | null>(null);
+  const [detailsLoading, setDetailsLoading] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useSearchQuery();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const currentPage = parseInt(searchParams.get("page") || "1", 10);
+  const detailsId = searchParams.get("details");
 
   useEffect(() => {
     const savedQuery = localStorage.getItem("searchQuery");
@@ -31,6 +34,12 @@ const Home: React.FC = () => {
   useEffect(() => {
     fetchResults(searchQuery, currentPage);
   }, [currentPage]);
+
+  useEffect(() => {
+    if (detailsId) {
+      fetchDetails(detailsId);
+    }
+  }, [detailsId]);
 
   const fetchResults = async (query: string, page: number) => {
     try {
@@ -67,14 +76,37 @@ const Home: React.FC = () => {
     }
   };
 
+  const fetchDetails = async (name: string) => {
+    try {
+      setDetailsLoading(true);
+      const response = await axios.get<Pokemon>(`${API_URL}/${name}`);
+      setSelectedPokemon(response.data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setDetailsLoading(false);
+    }
+  };
+
   const handleSearch = () => {
     localStorage.setItem("searchQuery", searchQuery.trim());
     setSearchParams({ page: "1" });
     fetchResults(searchQuery.trim(), 1);
   };
 
+  const handleSelect = (name: string) => {
+    setSearchParams({ ...Object.fromEntries(searchParams), details: name });
+  };
+
   const updatePage = (page: number) => {
     setSearchParams({ page: page.toString() });
+  };
+
+  const closeDetails = () => {
+    setSelectedPokemon(null);
+    const newSearchParams = new URLSearchParams(searchParams);
+    newSearchParams.delete("details");
+    setSearchParams(newSearchParams);
   };
 
   if (error) {
@@ -94,7 +126,7 @@ const Home: React.FC = () => {
   }
 
   return (
-    <div>
+    <>
       <div className="search-panel">
         <input
           className="search-input"
@@ -107,21 +139,66 @@ const Home: React.FC = () => {
           Search
         </button>
       </div>
-      <div className="result">
-        {isLoading ? (
-          <div className="loader">
-            <img src={loaderGif} alt="Loading..." className="loader" />
+      <div className="main-container">
+        <div className="left-side">
+          <div className="result">
+            {isLoading ? (
+              <div className="loader">
+                <img src={loaderGif} alt="Loading..." className="loader" />
+              </div>
+            ) : results.length > 0 ? (
+              results.map((result: Pokemon) => (
+                <Result key={result.name} result={result} onSelect={handleSelect} />
+              ))
+            ) : (
+              <p>No results found.</p>
+            )}
           </div>
-        ) : results.length > 0 ? (
-          results.map((result: Pokemon) => <Result key={result.name} result={result} />)
-        ) : (
-          <p>No results found.</p>
+          {results.length > 0 && (
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={updatePage}
+            />
+          )}
+        </div>
+        {selectedPokemon && (
+          <div className="details-panel">
+            {detailsLoading ? (
+              <div className="loader">
+                <img src={loaderGif} alt="Loading..." className="loader" />
+              </div>
+            ) : (
+              <div>
+                <button onClick={closeDetails}>Close</button>
+                <h2>{selectedPokemon.name}</h2>
+                <p>Base Experience: {selectedPokemon.base_experience}</p>
+                <h3>Abilities</h3>
+                <ul>
+                  {selectedPokemon.abilities.map((ability, index) => (
+                    <li key={index}>{ability.ability.name}</li>
+                  ))}
+                </ul>
+                <h3>Forms</h3>
+                <ul>
+                  {selectedPokemon.forms.map((form, index) => (
+                    <li key={index}>{form.name}</li>
+                  ))}
+                </ul>
+                <h3>Game Indices</h3>
+                <ul>
+                  {selectedPokemon.game_indices.map((gameIndex, index) => (
+                    <li key={index}>
+                      {gameIndex.version.name}: {gameIndex.game_index}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
         )}
       </div>
-      {results.length > 0 && (
-        <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={updatePage} />
-      )}
-    </div>
+    </>
   );
 };
 
