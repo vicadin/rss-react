@@ -25,8 +25,28 @@
 }
 .loader {
   width: 100vw;
+  position: absolute;
+  inset: 0;
 }
 .error-btn {
   background: rgb(170, 0, 0);
   color: white;
+}
+.main-container {
+  display: flex;
+  justify-content: space-between;
+  padding: 15px;
+}
+
+.result {
+  flex: 1;
+}
+
+.details-panel {
+  flex: 1;
+  border-left: 1px solid #ccc;
+  padding: 1em;
+}
+.left-side {
+  width: 50%;
 }

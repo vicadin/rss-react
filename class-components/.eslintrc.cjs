@@ -18,4 +18,9 @@ module.exports = {
     "react/react-in-jsx-scope": "off",
     "prettier/prettier": "error",
   },
+  settings: {
+    react: {
+      version: "detect",
+    },
+  },
 };
