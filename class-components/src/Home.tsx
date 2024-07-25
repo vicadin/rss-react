@@ -7,6 +7,8 @@ import Pagination from "./Pagination";
 import loaderGif from "../src/assets/loader.gif";
 import useSearchQuery from "./useSearchQuery";
 import { useSearchParams } from "react-router-dom";
+import ThemeSwitcher from "./ThemeSwitcher";
+import { useTheme } from "./ThemeContext";
 
 const API_URL = "https://pokeapi.co/api/v2/pokemon";
 const ITEMS_PER_PAGE = 10;
@@ -20,6 +22,7 @@ const Home: React.FC = () => {
   const [detailsLoading, setDetailsLoading] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useSearchQuery();
   const [searchParams, setSearchParams] = useSearchParams();
+  const { theme } = useTheme();
 
   const currentPage = parseInt(searchParams.get("page") || "1", 10);
   const detailsId = searchParams.get("details");
@@ -111,7 +114,7 @@ const Home: React.FC = () => {
 
   if (error) {
     return (
-      <div>
+      <div className={`theme-${theme}`}>
         <h2>Something went wrong</h2>
         <button
           className="error-btn"
@@ -126,18 +129,21 @@ const Home: React.FC = () => {
   }
 
   return (
-    <>
-      <div className="search-panel">
-        <input
-          className="search-input"
-          type="text"
-          placeholder="Search..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
-        <button className="search-btn" onClick={handleSearch}>
-          Search
-        </button>
+    <div className={`theme-${theme}`}>
+      <div className="header">
+        <ThemeSwitcher />
+        <div className="search-panel">
+          <input
+            className="search-input"
+            type="text"
+            placeholder="Search..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          <button className="search-btn" onClick={handleSearch}>
+            Search
+          </button>
+        </div>
       </div>
       <div className="main-container">
         <div className="left-side">
@@ -154,6 +160,7 @@ const Home: React.FC = () => {
               <p>No results found.</p>
             )}
           </div>
+
           {results.length > 0 && (
             <Pagination
               currentPage={currentPage}
@@ -198,7 +205,7 @@ const Home: React.FC = () => {
           </div>
         )}
       </div>
-    </>
+    </div>
   );
 };
 
