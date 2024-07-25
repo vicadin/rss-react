@@ -38,3 +38,18 @@ export interface AppState {
   error: Error | null;
   isLoading: boolean;
 }
+export type Theme = "light" | "dark";
+export interface ThemeContextProps {
+  theme: Theme;
+  toggleTheme: () => void;
+}
+export interface PaginationProps {
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+}
+
+export interface ResultProps {
+  result: Pokemon;
+  onSelect: (name: string) => void;
+}
