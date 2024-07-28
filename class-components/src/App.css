@@ -21,7 +21,7 @@
 }
 .header {
   width: 100vw;
-  padding: 20px 0;
+  padding: 20px 0 20px 15px;
   border-bottom: 1px solid rgba(255, 127, 91, 0.248);
   display: flex;
 }
@@ -62,6 +62,10 @@
   background-color: white;
   color: black;
 }
+.close-btn {
+  background: #050048;
+  color: white;
+}
 
 /* dark theme */
 .theme-dark {
@@ -93,4 +97,8 @@
 }
 .theme-dark .details-panel {
   border-left: 1px solid #ccc;
+}
+.theme-dark .close-btn {
+  background: #535178;
+  color: white;
 }

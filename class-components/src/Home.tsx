@@ -177,7 +177,7 @@ const Home: React.FC = () => {
               </div>
             ) : (
               <div>
-                <button onClick={closeDetails}>Close</button>
+                <button className="close-btn" onClick={closeDetails}>Close</button>
                 <h2>{selectedPokemon.name}</h2>
                 <p>Base Experience: {selectedPokemon.base_experience}</p>
                 <h3>Abilities</h3>
