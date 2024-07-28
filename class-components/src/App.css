@@ -17,11 +17,18 @@
   box-shadow: none;
 }
 .search-panel {
+  margin: 0 auto;
+}
+.header {
   width: 100vw;
-  padding: 20px 0;
+  padding: 20px 0 20px 15px;
   border-bottom: 1px solid rgba(255, 127, 91, 0.248);
   display: flex;
-  justify-content: center;
+}
+.theme-switcher select {
+  border-radius: 8px;
+  padding: 8px;
+  margin-left: 8px;
 }
 .loader {
   width: 100vw;
@@ -44,9 +51,54 @@
 
 .details-panel {
   flex: 1;
-  border-left: 1px solid #ccc;
+  border-left: 1px solid rgba(255, 127, 91, 0.248);
   padding: 1em;
 }
 .left-side {
   width: 50%;
+}
+
+.theme-switcher.light select {
+  background-color: white;
+  color: black;
+}
+.close-btn {
+  background: #050048;
+  color: white;
+}
+
+/* dark theme */
+.theme-dark {
+  background-color: #333;
+  color: white;
+}
+
+.theme-switcher.dark select {
+  background-color: #333;
+  color: white;
+}
+.theme-dark a {
+  color: #cfd2ff;
+}
+.theme-dark .search-btn {
+  background: #ffcbbb;
+  color: black;
+}
+.theme-dark .search-input {
+  background: #a0a0a0;
+  border: 2px white solid;
+  color: white;
+}
+.theme-dark .search-input::placeholder {
+  color: white;
+}
+.theme-dark .header {
+  border-bottom: 1px solid #ccc;
+}
+.theme-dark .details-panel {
+  border-left: 1px solid #ccc;
+}
+.theme-dark .close-btn {
+  background: #535178;
+  color: white;
 }

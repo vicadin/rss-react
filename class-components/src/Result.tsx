@@ -1,10 +1,5 @@
 import React from "react";
-import { Pokemon } from "./types";
-
-interface ResultProps {
-  result: Pokemon;
-  onSelect: (name: string) => void;
-}
+import { ResultProps } from "./types";
 
 const Result: React.FC<ResultProps> = ({ result, onSelect }) => {
   return (
