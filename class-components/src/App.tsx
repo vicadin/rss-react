@@ -5,19 +5,23 @@ import NotFound from "./NotFound";
 import ErrorBoundary from "./ErrorBoundary";
 import { ThemeProvider } from "./ThemeContext";
 import "./App.css";
+import store from "./store";
+import { Provider } from "react-redux";
 
 const App: React.FC = () => {
   return (
-    <ThemeProvider>
-      <Router>
-        <ErrorBoundary>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </ErrorBoundary>
-      </Router>
-    </ThemeProvider>
+    <Provider store={store}>
+      <ThemeProvider>
+        <Router>
+          <ErrorBoundary>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </ErrorBoundary>
+        </Router>
+      </ThemeProvider>
+    </Provider>
   );
 };
 

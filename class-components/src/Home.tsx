@@ -1,31 +1,41 @@
 import "./App.css";
 import { useState, useEffect } from "react";
-import axios from "axios";
-import { Pokemon, PokemonListResponse } from "./types";
+import { useDispatch, useSelector } from "react-redux";
+import { useSearchParams } from "react-router-dom";
 import Result from "./Result";
 import Pagination from "./Pagination";
 import loaderGif from "../src/assets/loader.gif";
-import useSearchQuery from "./useSearchQuery";
-import { useSearchParams } from "react-router-dom";
-import ThemeSwitcher from "./ThemeSwitcher";
+import { useGetPokemonsQuery, useGetPokemonByNameQuery } from "./services/pokemon";
+import { RootState } from "./store";
 import { useTheme } from "./ThemeContext";
+import { selectItem, deselectItem } from "./slices/selectionSlice";
+import ThemeSwitcher from "./ThemeSwitcher";
 
-const API_URL = "https://pokeapi.co/api/v2/pokemon";
 const ITEMS_PER_PAGE = 10;
 
 const Home: React.FC = () => {
-  const [results, setResults] = useState<Pokemon[]>([]);
-  const [error, setError] = useState<Error | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [totalPages, setTotalPages] = useState<number>(0);
-  const [selectedPokemon, setSelectedPokemon] = useState<Pokemon | null>(null);
-  const [detailsLoading, setDetailsLoading] = useState<boolean>(false);
-  const [searchQuery, setSearchQuery] = useSearchQuery();
+  const [searchQuery, setSearchQuery] = useState("");
   const [searchParams, setSearchParams] = useSearchParams();
   const { theme } = useTheme();
+  const dispatch = useDispatch();
 
   const currentPage = parseInt(searchParams.get("page") || "1", 10);
   const detailsId = searchParams.get("details");
+
+  const {
+    data: pokemonList,
+    isLoading: isLoadingPokemons,
+    error: pokemonsError,
+  } = useGetPokemonsQuery(currentPage);
+  const {
+    data: selectedPokemon,
+    isLoading: isLoadingDetails,
+    error: detailsError,
+  } = useGetPokemonByNameQuery(detailsId || "", {
+    skip: !detailsId,
+  });
+
+  const selectedItems = useSelector((state: RootState) => state.selection.selectedItems);
 
   useEffect(() => {
     const savedQuery = localStorage.getItem("searchQuery");
@@ -34,71 +44,14 @@ const Home: React.FC = () => {
     }
   }, []);
 
-  useEffect(() => {
-    fetchResults(searchQuery, currentPage);
-  }, [currentPage]);
-
-  useEffect(() => {
-    if (detailsId) {
-      fetchDetails(detailsId);
-    }
-  }, [detailsId]);
-
-  const fetchResults = async (query: string, page: number) => {
-    try {
-      setError(null);
-      setIsLoading(true);
-      let response;
-      const offset = (page - 1) * ITEMS_PER_PAGE;
-
-      if (query.trim() === "") {
-        response = await axios.get<PokemonListResponse>(
-          `${API_URL}?limit=${ITEMS_PER_PAGE}&offset=${offset}`,
-        );
-        setResults(response.data.results || []);
-        setTotalPages(Math.ceil(response.data.count / ITEMS_PER_PAGE));
-      } else {
-        response = await axios.get<Pokemon>(`${API_URL}/${query.trim().toLowerCase()}`);
-        setResults([
-          {
-            name: response.data.name,
-            url: `${API_URL}/${response.data.name}`,
-            abilities: response.data.abilities,
-            base_experience: response.data.base_experience,
-            forms: response.data.forms,
-            game_indices: response.data.game_indices,
-          },
-        ]);
-        setTotalPages(1);
-      }
-    } catch (err) {
-      setError(err as Error);
-      console.error(err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const fetchDetails = async (name: string) => {
-    try {
-      setDetailsLoading(true);
-      const response = await axios.get<Pokemon>(`${API_URL}/${name}`);
-      setSelectedPokemon(response.data);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setDetailsLoading(false);
-    }
-  };
-
   const handleSearch = () => {
     localStorage.setItem("searchQuery", searchQuery.trim());
     setSearchParams({ page: "1" });
-    fetchResults(searchQuery.trim(), 1);
   };
 
   const handleSelect = (name: string) => {
     setSearchParams({ ...Object.fromEntries(searchParams), details: name });
+    dispatch(selectItem(name));
   };
 
   const updatePage = (page: number) => {
@@ -106,13 +59,13 @@ const Home: React.FC = () => {
   };
 
   const closeDetails = () => {
-    setSelectedPokemon(null);
-    const newSearchParams = new URLSearchParams(searchParams);
-    newSearchParams.delete("details");
-    setSearchParams(newSearchParams);
+    if (detailsId) {
+      dispatch(deselectItem(detailsId));
+    }
+    setSearchParams({ ...Object.fromEntries(searchParams.entries()), details: "" });
   };
 
-  if (error) {
+  if (pokemonsError) {
     return (
       <div className={`theme-${theme}`}>
         <h2>Something went wrong</h2>
@@ -148,12 +101,12 @@ const Home: React.FC = () => {
       <div className="main-container">
         <div className="left-side">
           <div className="result">
-            {isLoading ? (
+            {isLoadingPokemons ? (
               <div className="loader">
                 <img src={loaderGif} alt="Loading..." className="loader" />
               </div>
-            ) : results.length > 0 ? (
-              results.map((result: Pokemon) => (
+            ) : pokemonList?.results.length > 0 ? (
+              pokemonList.results.map((result: any) => (
                 <Result key={result.name} result={result} onSelect={handleSelect} />
               ))
             ) : (
@@ -161,23 +114,27 @@ const Home: React.FC = () => {
             )}
           </div>
 
-          {results.length > 0 && (
+          {pokemonList && pokemonList.results.length > 0 && (
             <Pagination
               currentPage={currentPage}
-              totalPages={totalPages}
+              totalPages={Math.ceil(pokemonList.count / ITEMS_PER_PAGE)}
               onPageChange={updatePage}
             />
           )}
         </div>
-        {selectedPokemon && (
+        {detailsId && selectedPokemon && (
           <div className="details-panel">
-            {detailsLoading ? (
+            {isLoadingDetails ? (
               <div className="loader">
-                <img src={loaderGif} alt="Loading..." className="loader" />
+                <img src={loaderGif} alt="Loading..." />
               </div>
+            ) : detailsError ? (
+              <div>Error loading details: {detailsError.message}</div>
             ) : (
               <div>
-                <button className="close-btn" onClick={closeDetails}>Close</button>
+                <button className="close-btn" onClick={closeDetails}>
+                  Close
+                </button>
                 <h2>{selectedPokemon.name}</h2>
                 <p>Base Experience: {selectedPokemon.base_experience}</p>
                 <h3>Abilities</h3>

@@ -1,8 +1,6 @@
 import React from "react";
 import { PaginationProps } from "./types";
 
-
-
 const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages, onPageChange }) => {
   const handlePrevPage = () => {
     if (currentPage > 1) {
